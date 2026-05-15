@@ -25,9 +25,12 @@ Endpoints:
 ## Operating model
 
 - The browser runtime is long-running and compose-managed.
+- Before starting work, run `./cli/brs.js status`; `extensionConnected: true` means the Chrome companion extension is ready.
+- The broker waits briefly for extension reconnects, and the extension sends keepalives; if `extensionConnected` stays false, restart with `docker compose up --build -d`.
 - Agents must use broker leases; do not directly fight over Chrome tabs.
 - One lease maps to one real Chrome Tab Group.
 - Broker persists state/artifacts and owns task-level pacing; the extension only executes Chrome-native browser operations, including scripting-based humanized mouse/scroll/pause actions.
+- Extractor retries should preserve the extractor's real error. A `No group with id` failure usually means the runtime needs the current bugfix version loaded.
 
 ## Quick commands
 
