@@ -2,7 +2,7 @@
   "name": "agent-browser-runtime-broker",
   "version": "0.1.0",
   "type": "module",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "scripts": {
     "start": "node --no-warnings src/server.js",
     "test": "node --test test/*.test.js",

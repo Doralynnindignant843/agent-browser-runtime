@@ -12,6 +12,12 @@ You must comply with applicable laws, platform terms, privacy rules, account-saf
 
 If a target requires login, consent, payment, Captcha, MFA, or another human/account-safety checkpoint, use manual handoff and respect the outcome.
 
+## License and commercial use
+
+Agent Browser Runtime is source-available under the PolyForm Noncommercial License 1.0.0. Noncommercial learning, research, experimentation, and responsible technical exploration are permitted under the license terms.
+
+Commercial use, resale, commercial hosted service use, paid product integration, or use primarily intended to support commercial activity requires a separate written commercial license from the repository owner or copyright holder.
+
 ## What is included
 
 - Broker: Node/Fastify HTTP + WebSocket control plane for leases, jobs, artifacts, pacing, and state.
@@ -87,7 +93,7 @@ Use `--include-storage-state` only when you intentionally need a Playwright-styl
 
 Default host CDP port is `19223` to avoid conflicts with other local browser services.
 
-## Open-source boundary
+## Public release boundary
 
 The repository is designed to be publishable as a generic runtime package:
 
