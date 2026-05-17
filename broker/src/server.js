@@ -644,7 +644,7 @@ function stealthStatus(runtimeConfig = null, tlsGateway = null) {
     audioNoise: runtimeStealth.audioNoise ?? readEnvFlag('BRS_AUDIO_NOISE_ENABLED', true),
     acceptLanguage: runtimeStealth.acceptLanguage || String(process.env.BRS_ACCEPT_LANGUAGE || 'en-US,en;q=0.9'),
     locale: runtimeStealth.locale || String(process.env.BRS_LOCALE || 'en-US'),
-    timezone: runtimeStealth.timezone || String(process.env.BRS_STEALTH_TIMEZONE || process.env.BROWSER_TIMEZONE || 'Asia/Shanghai'),
+    timezone: runtimeStealth.timezone || String(process.env.BRS_STEALTH_TIMEZONE || process.env.BROWSER_TIMEZONE || 'UTC'),
     platform: runtimeStealth.platform || String(process.env.BRS_PLATFORM || ''),
     userAgent: runtimeStealth.userAgent ? 'configured' : (process.env.BRS_USER_AGENT ? 'configured' : 'default'),
     webgl: {

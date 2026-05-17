@@ -20,7 +20,7 @@ Create a lease. MVP mode is `shared-context-tab-group`; each lease maps to one r
 
 ```json
 {
-  "agentId": "vovo",
+  "agentId": "demo-agent",
   "taskId": "smoke",
   "domain": "example.com",
   "mode": "shared-context-tab-group",
@@ -126,7 +126,7 @@ Run an extractor from `/extractors`. Extractor filenames must match `<name>.extr
 {
   "extractor": "example.extract.js",
   "url": "https://example.com",
-  "agentId": "vovo",
+  "agentId": "demo-agent",
   "taskId": "extractor-smoke",
   "saveHtml": true,
   "screenshot": true,

@@ -1,4 +1,4 @@
-// Browser Runtime Skill Companion Extension
+// Agent Browser Runtime Companion Extension
 // Source of truth lives in broker. This extension only executes Chrome-native ops.
 
 try { importScripts('runtime-config.js'); } catch (_) {}

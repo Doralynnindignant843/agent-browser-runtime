@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 export DISPLAY=:${DISPLAY_NUM:-99}
-echo "=== browser-runtime-skill chrome-runtime ==="
+echo "=== Agent Browser Runtime chrome-runtime ==="
 echo "Display: $DISPLAY"
 echo "Screen: ${SCREEN_WIDTH}x${SCREEN_HEIGHT}x${SCREEN_DEPTH}"
 echo "noVNC: ${NOVNC_PORT} | CDP proxy: 19222 -> ${CDP_PORT}"

@@ -10,7 +10,7 @@ globalThis.BRS_CONFIG = globalThis.BRS_CONFIG || {
     acceptLanguage: 'en-US,en;q=0.9',
     languages: ['en-US', 'en'],
     locale: 'en-US',
-    timezone: 'Asia/Shanghai',
+    timezone: 'UTC',
     platform: '',
     userAgent: '',
     webglVendor: '',

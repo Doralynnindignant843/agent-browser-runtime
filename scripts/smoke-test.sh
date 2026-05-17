@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 
-AGENT_ID="${BRS_SMOKE_AGENT:-vovo}"
+AGENT_ID="${BRS_SMOKE_AGENT:-demo-agent}"
 TASK_PREFIX="${BRS_SMOKE_TASK_PREFIX:-smoke-$(date +%Y%m%d-%H%M%S)}"
 TARGET_URL="${BRS_SMOKE_URL:-https://example.com}"
 HUMANIZE_LEVEL="${BRS_SMOKE_HUMANIZE:-enhanced}"
@@ -99,10 +99,10 @@ node --check extractors/example.extract.js >/dev/null
 node --check extractors/failing.extract.js >/dev/null
 
 log "compose config"
-docker compose config >/tmp/browser-runtime-skill-compose-config.txt
+docker compose config >/tmp/agent-browser-runtime-compose-config.txt
 
 log "compose up --build -d"
-docker compose up --build -d >/tmp/browser-runtime-skill-smoke-up.log
+docker compose up --build -d >/tmp/agent-browser-runtime-smoke-up.log
 
 log "waiting for broker/extension"
 for _ in $(seq 1 30); do

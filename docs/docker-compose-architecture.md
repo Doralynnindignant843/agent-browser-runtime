@@ -1,9 +1,9 @@
 # Docker Compose Architecture
 
-`browser-runtime-skill` is a compose-managed local browser runtime. Agents talk to the broker; the broker talks to a Chrome companion extension over WebSocket; the extension executes Chrome-native tab/group/debugger operations.
+Agent Browser Runtime is a compose-managed local browser runtime. Agents talk to the broker; the broker talks to a Chrome companion extension over WebSocket; the extension executes Chrome-native tab/group/debugger operations.
 
 ```text
-Agents / OpenClaw skills
+Agents / skills
         |
         | HTTP client / CLI
         v

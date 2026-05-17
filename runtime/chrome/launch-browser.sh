@@ -77,7 +77,26 @@ fi
 
 EXTENSION_ARGS=()
 if [ -n "${BROWSER_EXTENSION_DIR:-}" ] && [ -f "${BROWSER_EXTENSION_DIR}/manifest.json" ]; then
-  EXTENSION_INSTANCE_ID="$(printf '%s' "${BOT_RUNTIME_SIGNATURE:-default}" | tr -c 'A-Za-z0-9_.-' '_' | cut -c1-64)"
+  EXTENSION_BASE_ID="$(printf '%s' "${BOT_RUNTIME_SIGNATURE:-default}" | tr -c 'A-Za-z0-9_.-' '_' | cut -c1-56)"
+  EXTENSION_CONFIG_HASH="$(python3 - <<'PY'
+import hashlib
+import os
+
+exact = {
+    "BOT_RUNTIME_SIGNATURE",
+    "BROWSER_PROXY_BYPASS_LIST",
+    "BROWSER_PROXY_SERVER",
+    "BROWSER_RUNTIME_BROKER_WS",
+    "BROWSER_TIMEZONE",
+}
+items = []
+for key in sorted(os.environ):
+    if key.startswith("BRS_") or key.startswith("FINGERPRINT_") or key in exact:
+        items.append(f"{key}={os.environ.get(key, '')}")
+print(hashlib.sha256("\n".join(items).encode("utf-8")).hexdigest()[:12])
+PY
+)"
+  EXTENSION_INSTANCE_ID="${EXTENSION_BASE_ID}-${EXTENSION_CONFIG_HASH}"
   GENERATED_EXTENSION_DIR="/tmp/browser-runtime-extension-${EXTENSION_INSTANCE_ID}"
   rm -rf "${GENERATED_EXTENSION_DIR}"
   mkdir -p "${GENERATED_EXTENSION_DIR}"
@@ -227,13 +246,13 @@ def platform_profile(platform_key, rng):
             "maxTouchPoints": 0,
         },
     }
-    return profiles.get(platform_key, profiles["macos"])
+    return profiles.get(platform_key, profiles["windows"])
 
 def build_fingerprint():
     enabled = flag("BRS_GENERATE_FINGERPRINT_ENABLED", True)
     seed, raw_seed = seed_int()
     rng = random.Random(seed)
-    platform_key = env("BRS_FINGERPRINT_PLATFORM", env("FINGERPRINT_PLATFORM", "macos")).lower()
+    platform_key = env("BRS_FINGERPRINT_PLATFORM", env("FINGERPRINT_PLATFORM", "windows")).lower()
     platform = platform_profile(platform_key, rng)
     major = int(env("BRS_CHROME_MAJOR", env("BRS_DETECTED_CHROME_MAJOR", "124")))
     full_version = env("BRS_CHROME_FULL_VERSION", env("BRS_DETECTED_CHROME_FULL_VERSION", chrome_version(rng, major)))
@@ -342,7 +361,7 @@ config = {
         "acceptLanguage": accept_language,
         "languages": json_list("BRS_LANGUAGES_JSON", fingerprint["languages"] or derived_languages or ["en-US", "en"]),
         "locale": env("BRS_LOCALE", "en-US"),
-        "timezone": env("BRS_STEALTH_TIMEZONE", env("BROWSER_TIMEZONE", "Asia/Shanghai")),
+        "timezone": env("BRS_STEALTH_TIMEZONE", env("BROWSER_TIMEZONE", "UTC")),
         "platform": explicit_platform or (fingerprint["navigatorPlatform"] if fingerprint["enabled"] else ""),
         "userAgent": explicit_user_agent or (fingerprint["userAgent"] if fingerprint["enabled"] else ""),
         "userAgentMetadata": fingerprint["userAgentMetadata"] if fingerprint["enabled"] and not explicit_user_agent else None,
@@ -371,7 +390,7 @@ COMMON_ARGS=(
   --disable-sync
   --no-default-browser-check
   --disable-blink-features=AutomationControlled
-  --timezone="${BROWSER_TIMEZONE:-Asia/Shanghai}"
+  --timezone="${BROWSER_TIMEZONE:-UTC}"
   --user-data-dir="${USER_DATA_DIR}"
   --remote-debugging-port="${CDP_PORT:-9222}"
   --remote-debugging-address=0.0.0.0
@@ -396,7 +415,7 @@ if [ -n "${FINGERPRINT_BIN}" ]; then
   exec "${FINGERPRINT_BIN}" \
     "${COMMON_ARGS[@]}" \
     --fingerprint="${FINGERPRINT_SEED:-1000}" \
-    --fingerprint-platform="${FINGERPRINT_PLATFORM:-macos}" \
+    --fingerprint-platform="${FINGERPRINT_PLATFORM:-windows}" \
     "${EXTENSION_ARGS[@]}" \
     "${CHROME_PROXY_ARGS[@]}" \
     about:blank

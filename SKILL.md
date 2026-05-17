@@ -1,17 +1,18 @@
 ---
-name: browser-runtime-skill
-description: Use a compose-managed real Chrome runtime with persistent profile, noVNC handoff, real Tab Groups, leases, extractor jobs, default browser consistency policy, and runtime humanization for browser scraping or page exploration.
+name: agent-browser-runtime
+description: Use Agent Browser Runtime, a compose-managed real Chrome runtime with persistent profile, noVNC handoff, real Tab Groups, leases, extractor jobs, default browser consistency policy, and runtime humanization for browser scraping or page exploration.
 ---
 
-# browser-runtime-skill
+# Agent Browser Runtime
 
-Use this private skill when an agent needs a real, persistent browser runtime for scraping, exploration, login-state reuse, or extractor execution.
+Use this skill when an agent needs a real, persistent browser runtime for page exploration, login-state reuse, screenshot/HTML evidence, session probes, or extractor execution.
 
 ## Runtime
 
-This skill expects the project stack to be running from `/Users/zhi/Desktop/Projects/browser-runtime-skill`:
+This skill expects the project stack to be running from the Agent Browser Runtime repository root:
 
 ```bash
+cp .env.example .env
 docker compose up --build -d
 ./scripts/smoke-test.sh
 ```
@@ -42,10 +43,10 @@ From the project root:
 
 ```bash
 ./cli/brs.js status
-./cli/brs.js fetch https://example.com --agent vovo --task smoke --screenshot --humanize enhanced
+./cli/brs.js fetch https://example.com --agent demo-agent --task smoke --screenshot --humanize enhanced
 ./cli/brs.js probe-session linkedin --humanize off --cooldown false
-./cli/brs.js extract example.extract.js https://example.com --agent vovo --task extractor-smoke --screenshot --save-html
-./cli/brs.js acquire --agentId vovo --taskId research --domain example.com
+./cli/brs.js extract example.extract.js https://example.com --agent demo-agent --task extractor-smoke --screenshot --save-html
+./cli/brs.js acquire --agentId demo-agent --taskId research --domain example.com
 ./cli/brs.js open <leaseId> https://example.com
 ./cli/brs.js release <leaseId>
 ```
@@ -61,8 +62,8 @@ MVP implements `shared-context-tab-group`; use `dedicated-runtime` conceptually 
 ## Safety
 
 - Runtime profile, artifacts, and SQLite state are gitignored.
-- Do not commit cookies, credentials, screenshots with secrets, or `.env`.
-- If login/Captcha appears, use noVNC for manual handoff instead of trying to bypass it.
+- Do not commit cookies, credentials, screenshots with secrets, raw harvested content, or `.env`.
+- If login/Captcha appears, use noVNC for manual handoff.
 - Runtime upgrades preserve the persisted browser profile by default. Use `BRS_RESET_PROFILE_ON_SIGNATURE_CHANGE=1` only for an intentional profile wipe.
 - `accounts.google.com` is excluded from default stealth/fingerprint patches because Google account and Chrome Sync flows are more sensitive to spoofed browser identity than normal collection targets.
 

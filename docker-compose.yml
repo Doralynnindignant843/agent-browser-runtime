@@ -1,8 +1,10 @@
+name: agent-browser-runtime
+
 services:
   broker:
     build:
       context: ./broker
-    container_name: browser-runtime-broker
+    container_name: agent-browser-runtime-broker
     init: true
     environment:
       NODE_ENV: production
@@ -58,7 +60,7 @@ services:
   chrome-runtime:
     build:
       context: ./runtime/chrome
-    container_name: browser-runtime-chrome
+    container_name: agent-browser-runtime-chrome
     init: true
     shm_size: "2gb"
     environment:
@@ -70,10 +72,10 @@ services:
       SCREEN_HEIGHT: ${SCREEN_HEIGHT:-1000}
       SCREEN_DEPTH: ${SCREEN_DEPTH:-24}
       FINGERPRINT_SEED: ${FINGERPRINT_SEED:-1000}
-      FINGERPRINT_PLATFORM: ${FINGERPRINT_PLATFORM:-macos}
-      BROWSER_TIMEZONE: ${BROWSER_TIMEZONE:-Asia/Shanghai}
+      FINGERPRINT_PLATFORM: ${FINGERPRINT_PLATFORM:-windows}
+      BROWSER_TIMEZONE: ${BROWSER_TIMEZONE:-UTC}
       BOT_HUMANIZE_LEVEL: ${BOT_HUMANIZE_LEVEL:-enhanced}
-      BOT_RUNTIME_SIGNATURE: ${BOT_RUNTIME_SIGNATURE:-browser-runtime-skill:v11-profile-preserve-extension-refresh}
+      BOT_RUNTIME_SIGNATURE: ${BOT_RUNTIME_SIGNATURE:-agent-browser-runtime:v11-profile-preserve-extension-refresh}
       BRS_RESET_PROFILE_ON_SIGNATURE_CHANGE: ${BRS_RESET_PROFILE_ON_SIGNATURE_CHANGE:-0}
       BROWSER_PROXY_SERVER: ${BROWSER_PROXY_SERVER:-}
       BROWSER_PROXY_BYPASS_LIST: ${BROWSER_PROXY_BYPASS_LIST:-127.0.0.1,localhost,::1,broker,chrome-runtime}
@@ -114,4 +116,4 @@ services:
 
 networks:
   default:
-    name: browser-runtime-skill
+    name: agent-browser-runtime

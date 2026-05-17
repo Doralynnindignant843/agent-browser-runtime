@@ -1,50 +1,62 @@
-# browser-runtime-skill
+# Agent Browser Runtime
 
-Compose-managed shared real-browser runtime for agents, with persistent profile, noVNC handoff, leases, artifacts, humanized pacing, and a default browser consistency policy.
+Agent Browser Runtime is a compose-managed real Chrome runtime for AI agents. It gives each agent a leased Chrome Tab Group, a persistent browser profile, noVNC human handoff, artifact capture, extractor jobs, humanized pacing, and an explicit browser-consistency layer.
 
-## Start
+The point is simple: agents work through a shared, visible browser runtime instead of fighting over ad hoc headless sessions.
+
+## What is included
+
+- Broker: Node/Fastify HTTP + WebSocket control plane for leases, jobs, artifacts, pacing, and state.
+- Browser runtime: Chromium/Chrome in Docker with CDP, Xvfb, x11vnc, noVNC, and a persistent profile mount.
+- Companion extension: Chrome extension that owns real tabs, real Tab Groups, debugger/CDP calls, screenshots, HTML capture, session probes, and humanized primitives.
+- CLI: `./cli/brs.js` for status, fetch, session probes, extractor jobs, artifacts, and leases.
+- Skills: `SKILL.md` for runtime usage and `skills/agent-browser-runtime-deploy/SKILL.md` for agent-led local deployment.
+- Examples: generic extractor examples only. Site-specific/private extractors are intentionally out of tree.
+
+## Quick start
 
 ```bash
 cp .env.example .env
 docker compose up --build -d
-```
-
-## Smoke test
-
-Full runtime smoke test:
-
-```bash
 ./scripts/smoke-test.sh
 ```
 
-It validates compose config/startup, broker/extension connection, humanized fetch, extractor execution, params schema, retry/error artifacts, job/artifact APIs, real Tab Group open/release, and artifact file sizes.
+Open noVNC when a login, challenge, or manual inspection is needed:
+
+```bash
+open 'http://127.0.0.1:16080/vnc.html?autoconnect=true&resize=remote'
+```
 
 Quick manual checks:
 
 ```bash
 ./cli/brs.js status
-./cli/brs.js fetch https://example.com --agent vovo --task smoke --screenshot --humanize enhanced
+./cli/brs.js fetch https://example.com --agent demo-agent --task smoke --screenshot --humanize enhanced
 ```
 
 Expected outputs: broker status, HTML artifact, screenshot artifact, and a real Chrome Tab Group visible in noVNC.
 
 `./cli/brs.js status` also reports `stealth.enabled`, fingerprint header/patch toggles, and whether the optional TLS gateway proxy is configured.
 It now also reports the loaded runtime fingerprint summary from the extension, including generated UA family, UA-CH header keys, platform, WebGL, and hardware-surface values.
+The `BRS_*` environment prefix is kept as the stable Browser Runtime Service config surface.
 
-## Browser consistency policy
+## Anti-bot and browser-consistency stack
 
-The runtime now treats stealth/fingerprint behavior as a default-on policy layer:
+Agent Browser Runtime does not hide what it is doing. The runtime has a default-on anti-bot/risk-control compatibility layer so browser automation looks internally coherent across launch args, request headers, JS-visible surfaces, pacing, and manual handoff.
 
-- extension content script patches common browser-surface signals at `document_start`, including webdriver, languages, platform, vendor, plugins/mimeTypes, Chrome app/runtime stubs, media codecs, WebGL, canvas, and audio
-- high-trust login domains can be excluded from the consistency layer with `BRS_STEALTH_EXCLUDED_HOSTS`; `accounts.google.com` is excluded by default
-- CDP applies `Accept-Language`, UA/UA-CH metadata, extra headers, locale, and timezone before first real navigation
-- launch config generates a coherent seed-based browser profile by default: user agent, UA-CH, Accept-Language, platform, WebGL, hardware concurrency, device memory, and touch-points move together
-- Chrome version is detected from the runtime binary by default; set `BRS_CHROME_MAJOR` or `BRS_CHROME_FULL_VERSION` only when you intentionally need a pinned advertised version
-- explicit `BRS_USER_AGENT`, `BRS_PLATFORM`, `BRS_WEBGL_VENDOR`, `BRS_WEBGL_RENDERER`, and `BRS_EXTRA_HTTP_HEADERS_JSON` values still override or extend the generated profile
-- humanized pacing remains enabled through `BOT_HUMANIZE_LEVEL` or `--humanize`
-- TLS gateway support is enabled as a capability, becomes active when `BRS_TLS_GATEWAY_PROXY_SERVER` is set, adds Chromium proxy args with QUIC disabled, and can expose `/health` and `/stats` through `./cli/brs.js status`
+- Real browser runtime instead of pure headless fetches.
+- Persistent Chrome profile for login-state reuse, cookies, localStorage, and extension state.
+- noVNC human handoff for login, Captcha, slider, MFA, and account-safety checkpoints.
+- Real Chrome Tab Groups so concurrent agents have visible, lease-scoped workspaces.
+- Seed-based fingerprint generation: user agent, UA-CH, Accept-Language, platform, WebGL, hardware concurrency, device memory, and touch points move together.
+- CDP header and emulation overrides before navigation: UA/UA-CH, locale, timezone, Accept-Language, and optional extra headers.
+- Main-world stealth patching at `document_start`: webdriver, languages, platform, vendor, plugins/mimeTypes, Chrome runtime stubs, permissions, media codecs, WebGL, canvas, and audio surfaces.
+- Canvas/audio noise controls and explicit WebGL/user-agent/platform overrides for compatibility testing.
+- Platform cooldowns plus per-job humanized warmup, mousemove, scroll, and pause primitives.
+- Optional proxy/TLS-gateway integration with QUIC disabled on the proxied path and health/stats surfacing in `status`.
+- High-trust login-host exclusions through `BRS_STEALTH_EXCLUDED_HOSTS`; `accounts.google.com` is excluded by default because spoofing can harm account login flows.
 
-This is compatibility infrastructure for real-browser agent work, not a guarantee that any platform will accept automation. Use noVNC for login, Captcha, slider, or account-safety handoff.
+This is compatibility infrastructure for legitimate real-browser agent work, not a promise that any platform will accept automation. Use noVNC for login, Captcha, slider, or account-safety handoff.
 Runtime upgrades preserve the persisted browser profile by default; set `BRS_RESET_PROFILE_ON_SIGNATURE_CHANGE=1` only when you intentionally want to wipe cookies/profile state after a signature change.
 
 ## Session probes
@@ -62,10 +74,18 @@ Use `--include-storage-state` only when you intentionally need a Playwright-styl
 ## Extractor smoke
 
 ```bash
-./cli/brs.js extract example.extract.js https://example.com --agent vovo --task extractor-smoke --screenshot --save-html
+./cli/brs.js extract example.extract.js https://example.com --agent demo-agent --task extractor-smoke --screenshot --save-html
 ```
 
 Default host CDP port is `19223` to avoid conflicts with other local browser services.
+
+## Open-source boundary
+
+The repository is designed to be publishable as a generic runtime package:
+
+- Tracked: runtime code, docs, generic extractor examples, `.env.example`, and agent skills.
+- Ignored: `.env`, SQLite state, artifacts, screenshots, traces, and persisted Chrome profile data.
+- Excluded: private site extractors, customer/project-specific workflows, account cookies, credentials, and harvested content.
 
 ## Files
 
@@ -76,10 +96,11 @@ Default host CDP port is `19223` to avoid conflicts with other local browser ser
 - `runtime/chrome/` — Chromium + noVNC container
 - `cli/brs.js` — small operator/client CLI
 - `scripts/smoke-test.sh` — full local runtime regression test
-- `extractors/` — site extractor scripts with optional params schema
+- `extractors/` — generic extractor scripts with optional params schema
+- `skills/agent-browser-runtime-deploy/` — deployment skill for other agents
 - `data/`, `artifacts/`, `runtime/profile/` — runtime state, gitignored
 
-## Internal product APIs
+## Operator APIs
 
 ```bash
 ./cli/brs.js jobs

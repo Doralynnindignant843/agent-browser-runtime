@@ -1,22 +1,22 @@
-# Browser Runtime Skill SPEC v0.1
+# Agent Browser Runtime SPEC v0.1
 
 ## Goal
 
 Provide a compose-managed, persistent real-browser runtime that multiple agents can share safely. Agents never control Chrome directly; they acquire a lease from the broker, receive a real Chrome Tab Group workspace, run exploration or extractor jobs, and release the lease.
 
-## Resources folded into this design
+## Design lineage
 
-- LeadsDaddy runtime: Dockerized Chromium, CDP, noVNC, persistent profile, fingerprint/proxy/timezone launch contract, profile-signature reset, artifact retention, and humanized action primitives.
-- Signalist runtime pattern: explicit browser runtime contract, CDP readiness, humanize/pacing idea, artifacts-on-failure discipline.
+- Production browser-agent runtime patterns: Dockerized Chromium, CDP, noVNC, persistent profile, fingerprint/proxy/timezone launch contract, profile-signature reset, artifact retention, and humanized action primitives.
+- Page-collection runtime patterns: explicit browser runtime contract, CDP readiness, humanize/pacing, and artifacts-on-failure discipline.
 - ChromeForHermes prototype: `chrome.tabs.group`, `chrome.tabGroups.update`, `chrome.debugger.attach/sendCommand`, session-scoped tab groups.
-- Codex Chrome extension observation: native Chrome Tab Groups are practical when implemented by a companion extension, not by raw Playwright alone.
+- Companion-extension lesson: native Chrome Tab Groups are practical when implemented by a browser extension, not by raw Playwright alone.
 
 ## Deployment
 
 Docker Compose owns the runtime:
 
 ```text
-browser-runtime-skill
+agent-browser-runtime
 ├─ broker          # HTTP/WS control plane, lease/job/artifacts/state
 └─ chrome-runtime  # Chromium + noVNC + persistent profile + companion extension
 ```
@@ -70,7 +70,7 @@ Default capabilities:
 - `BRS_CANVAS_NOISE_ENABLED=1` / `BRS_AUDIO_NOISE_ENABLED=1`: patch common canvas/audio fingerprint surfaces.
 - `BRS_LOCALE`, `BRS_STEALTH_TIMEZONE`, `BRS_USER_AGENT`, `BRS_PLATFORM`, `BRS_WEBGL_VENDOR`, and `BRS_WEBGL_RENDERER`: optional explicit profile overrides.
 - `BOT_HUMANIZE_LEVEL` and per-job `--humanize`: task-level pacing, mousemove, scroll, and pauses.
-- `BRS_PLATFORM_COOLDOWN_ENABLED=1`: platform-level cooldown defaults mirror LeadsDaddy's runtime pacing layer (`reddit=45s`, `facebook=60s`, `linkedin=180s`, `instagram=240s`, manual challenge `300s`).
+- `BRS_PLATFORM_COOLDOWN_ENABLED=1`: platform-level cooldown defaults cover common high-friction social surfaces (`reddit=45s`, `facebook=60s`, `linkedin=180s`, `instagram=240s`, manual challenge `300s`).
 - `BRS_TLS_GATEWAY_ENABLED=1`: TLS gateway capability is enabled by default, but it is only active when `BRS_TLS_GATEWAY_PROXY_SERVER` points at a real proxy/gateway. When active, Chromium receives `--proxy-server` and `--disable-quic`. Status can read gateway health/stats with `BRS_TLS_GATEWAY_BASE_URL`, `BRS_TLS_GATEWAY_HEALTH_URL`, or `BRS_TLS_GATEWAY_STATS_URL`.
 
 The default profile is `BRS_STEALTH_PROFILE=standard`. Set `BRS_STEALTH_ENABLED=0` for debugging or site compatibility isolation.
@@ -111,9 +111,9 @@ Create a lease.
 
 ```json
 {
-  "agentId": "vovo",
-  "taskId": "etsy-test-001",
-  "domain": "etsy.com",
+  "agentId": "demo-agent",
+  "taskId": "research-001",
+  "domain": "example.com",
   "mode": "shared-context-tab-group",
   "ttlMs": 1800000
 }
@@ -201,7 +201,7 @@ Runs `/extractors/<name>.extract.js`; extractor must export `extract({ url, fina
 CLI:
 
 ```bash
-./cli/brs.js extract example.extract.js https://example.com --agent vovo --task extractor-smoke --screenshot --save-html
+./cli/brs.js extract example.extract.js https://example.com --agent demo-agent --task extractor-smoke --screenshot --save-html
 ```
 
 ## Extension JSON-RPC
@@ -245,7 +245,7 @@ Manual equivalent:
 cp .env.example .env
 docker compose up --build -d
 ./cli/brs.js status
-./cli/brs.js fetch https://example.com --agent vovo --task smoke --screenshot --humanize enhanced
+./cli/brs.js fetch https://example.com --agent demo-agent --task smoke --screenshot --humanize enhanced
 ```
 
 Expected:

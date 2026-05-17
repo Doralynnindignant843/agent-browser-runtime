@@ -1,8 +1,8 @@
 {
-  "name": "browser-runtime-broker",
+  "name": "agent-browser-runtime-broker",
   "version": "0.1.0",
   "type": "module",
-  "private": true,
+  "license": "MIT",
   "scripts": {
     "start": "node --no-warnings src/server.js",
     "test": "node --test test/*.test.js",
