@@ -24,6 +24,12 @@ docker compose up --build -d
 ./scripts/smoke-test.sh
 ```
 
+To use a local `fingerprint-chromium` binary, set `BRS_FINGERPRINT_CHROMIUM_HOST_PATH` and start with:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.fingerprint.yml up --build -d
+```
+
 Expected endpoints:
 
 - Broker: `http://127.0.0.1:17890`
@@ -56,6 +62,7 @@ Run:
 Agent Browser Runtime intentionally exposes its anti-bot/risk-control browser consistency layer:
 
 - `BRS_GENERATE_FINGERPRINT_ENABLED`
+- `BRS_FINGERPRINT_CHROMIUM_HOST_PATH`
 - `BRS_FINGERPRINT_HEADERS_ENABLED`
 - `BRS_FINGERPRINT_PATCHES_ENABLED`
 - `BRS_STEALTH_EXCLUDED_HOSTS`

@@ -45,6 +45,7 @@ Responsibilities:
 - persistent real Chromium profile under `runtime/profile`
 - noVNC manual handoff for login/Captcha
 - loads `extension/` at browser launch
+- can mount `fingerprint-chromium` through `docker-compose.fingerprint.yml`; when present, launch uses the mounted binary with `--fingerprint`
 - generates `runtime-config.js` from `BRS_*` env vars for the companion extension
 - generates a coherent seed-based fingerprint profile unless `BRS_GENERATE_FINGERPRINT_ENABLED=0`
 - applies the startup-level proxy/TLS gateway when `BRS_TLS_GATEWAY_PROXY_SERVER` is set and disables QUIC for that proxied path

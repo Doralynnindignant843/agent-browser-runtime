@@ -627,6 +627,7 @@ async function runtimeStatus() {
     platformPacing: platformPacingStatus(),
     stealth: stealthStatus(runtimeConfig?.config, tlsGateway),
     tlsGateway,
+    browserRuntime: runtimeConfig?.config?.browserRuntime || null,
     runtimeConfig: runtimeConfig?.config || null,
     tabOwnership: await tabOwnershipAudit(),
     leases: store.listLeases({ activeOnly: true }).map((lease) => ({ ...lease, tabs: store.listTabs(lease.id) })),

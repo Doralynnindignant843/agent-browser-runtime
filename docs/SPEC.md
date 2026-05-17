@@ -63,6 +63,8 @@ The runtime has a default-on browser consistency layer. It is intended to make r
 Default capabilities:
 
 - `BRS_GENERATE_FINGERPRINT_ENABLED=1`: derive a coherent browser identity from `BRS_FINGERPRINT_SEED` or `FINGERPRINT_SEED`.
+- `BRS_RUNTIME_PRESET=linkedin`: default browser identity preset aligns TLS gateway, UA/UA-CH, navigator platform, timezone, and WebGL around a Chrome 124 macOS profile unless explicitly overridden.
+- `docker-compose.fingerprint.yml`: optional overlay that mounts a host `fingerprint-chromium` directory at `/opt/fingerprint-chromium`; when `chrome-wrapper` or `chrome` is present, Chromium startup uses that binary with `--fingerprint` and reports it through `status.browserRuntime`.
 - Generated identity includes user agent, UA-CH metadata and headers, `Accept-Language`, navigator platform, WebGL vendor/renderer, hardware concurrency, device memory, and touch points.
 - Chromium major/full version is detected from the runtime binary by default. `BRS_CHROME_MAJOR` and `BRS_CHROME_FULL_VERSION` intentionally override the detected version when set.
 - `BRS_FINGERPRINT_HEADERS_ENABLED=1`: apply generated headers plus optional `BRS_EXTRA_HTTP_HEADERS_JSON` through CDP before first navigation.

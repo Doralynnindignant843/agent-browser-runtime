@@ -62,16 +62,45 @@ if [ -n "${BROWSER_PROXY_BYPASS_LIST:-}" ]; then
   CHROME_PROXY_ARGS+=("--proxy-bypass-list=${BROWSER_PROXY_BYPASS_LIST}")
 fi
 
+FINGERPRINT_BIN=""
+if [ -x "/opt/fingerprint-chromium/chrome-wrapper" ]; then
+  FINGERPRINT_BIN="/opt/fingerprint-chromium/chrome-wrapper"
+elif [ -x "/opt/fingerprint-chromium/chrome" ]; then
+  FINGERPRINT_BIN="/opt/fingerprint-chromium/chrome"
+else
+  NESTED_FINGERPRINT_BIN="$(find /opt/fingerprint-chromium -maxdepth 2 -type f \( -name chrome-wrapper -o -name chrome \) 2>/dev/null | head -n 1)"
+  if [ -n "${NESTED_FINGERPRINT_BIN}" ] && [ -x "${NESTED_FINGERPRINT_BIN}" ]; then
+    FINGERPRINT_BIN="${NESTED_FINGERPRINT_BIN}"
+  fi
+fi
+
+if [ -n "${FINGERPRINT_BIN}" ]; then
+  export BRS_BROWSER_BINARY_KIND="fingerprint-chromium"
+  export BRS_FINGERPRINT_CHROMIUM_ACTIVE="1"
+  export BRS_FINGERPRINT_CHROMIUM_BINARY="${FINGERPRINT_BIN}"
+else
+  export BRS_BROWSER_BINARY_KIND="system-chromium"
+  export BRS_FINGERPRINT_CHROMIUM_ACTIVE="0"
+  export BRS_FINGERPRINT_CHROMIUM_BINARY=""
+fi
+export BRS_RUNTIME_CONFIG_GENERATOR_VERSION="v2-linkedin-preset"
+
 DETECTED_CHROME_FULL_VERSION=""
 DETECTED_CHROME_MAJOR=""
-if command -v chromium >/dev/null 2>&1; then
-  CHROME_VERSION_TEXT="$(chromium --version 2>/dev/null || true)"
+CHROME_VERSION_BIN=""
+if [ -n "${FINGERPRINT_BIN}" ]; then
+  CHROME_VERSION_BIN="${FINGERPRINT_BIN}"
+elif command -v chromium >/dev/null 2>&1; then
+  CHROME_VERSION_BIN="chromium"
+fi
+if [ -n "${CHROME_VERSION_BIN}" ]; then
+  CHROME_VERSION_TEXT="$("${CHROME_VERSION_BIN}" --version 2>/dev/null || true)"
   if [[ "${CHROME_VERSION_TEXT}" =~ ([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
     DETECTED_CHROME_FULL_VERSION="${BASH_REMATCH[0]}"
     DETECTED_CHROME_MAJOR="${BASH_REMATCH[1]}"
     export BRS_DETECTED_CHROME_FULL_VERSION="${DETECTED_CHROME_FULL_VERSION}"
     export BRS_DETECTED_CHROME_MAJOR="${DETECTED_CHROME_MAJOR}"
-    echo "Detected Chromium version: ${DETECTED_CHROME_FULL_VERSION}"
+    echo "Detected browser version: ${DETECTED_CHROME_FULL_VERSION} (${BRS_BROWSER_BINARY_KIND})"
   fi
 fi
 
@@ -254,8 +283,17 @@ def build_fingerprint():
     rng = random.Random(seed)
     platform_key = env("BRS_FINGERPRINT_PLATFORM", env("FINGERPRINT_PLATFORM", "windows")).lower()
     platform = platform_profile(platform_key, rng)
-    major = int(env("BRS_CHROME_MAJOR", env("BRS_DETECTED_CHROME_MAJOR", "124")))
-    full_version = env("BRS_CHROME_FULL_VERSION", env("BRS_DETECTED_CHROME_FULL_VERSION", chrome_version(rng, major)))
+    explicit_major = env("BRS_CHROME_MAJOR", "")
+    detected_major = env("BRS_DETECTED_CHROME_MAJOR", "")
+    major = int(explicit_major or detected_major or "124")
+    explicit_full_version = env("BRS_CHROME_FULL_VERSION", "")
+    detected_full_version = env("BRS_DETECTED_CHROME_FULL_VERSION", "")
+    if explicit_full_version:
+        full_version = explicit_full_version
+    elif explicit_major:
+        full_version = chrome_version(rng, major)
+    else:
+        full_version = detected_full_version or chrome_version(rng, major)
     browser_brand = env("BRS_BROWSER_BRAND", "Google Chrome")
     not_brand_version = str(rng.choice([8, 24, 99]))
     brands = [
@@ -306,8 +344,6 @@ def build_fingerprint():
         "sec-ch-ua-full-version": f'"{full_version}"',
         "sec-ch-ua-full-version-list": sec_ch_full,
     }
-    if env("BRS_STEALTH_PROFILE", "standard").lower() == "linkedin":
-        generated_headers["Origin"] = "https://www.linkedin.com"
     return {
         "enabled": enabled,
         "seed": raw_seed,
@@ -341,6 +377,17 @@ explicit_user_agent = env("BRS_USER_AGENT", "")
 explicit_platform = env("BRS_PLATFORM", "")
 config = {
     "brokerWs": env("BROWSER_RUNTIME_BROKER_WS", "ws://broker:17890/extension"),
+    "browserRuntime": {
+        "preset": env("BRS_RUNTIME_PRESET", ""),
+        "binary": env("BRS_BROWSER_BINARY_KIND", "system-chromium"),
+        "fingerprintChromium": {
+            "active": flag("BRS_FINGERPRINT_CHROMIUM_ACTIVE", False),
+            "binary": env("BRS_FINGERPRINT_CHROMIUM_BINARY", ""),
+            "mountPath": "/opt/fingerprint-chromium",
+            "fingerprintSeed": env("FINGERPRINT_SEED", "1000"),
+            "fingerprintPlatform": env("FINGERPRINT_PLATFORM", "windows"),
+        },
+    },
     "fingerprint": {
         "generated": fingerprint["enabled"],
         "seed": fingerprint["seed"],
@@ -397,18 +444,6 @@ COMMON_ARGS=(
   --window-size="${SCREEN_WIDTH:-1440},${SCREEN_HEIGHT:-1000}"
   --start-maximized
 )
-
-FINGERPRINT_BIN=""
-if [ -x "/opt/fingerprint-chromium/chrome-wrapper" ]; then
-  FINGERPRINT_BIN="/opt/fingerprint-chromium/chrome-wrapper"
-elif [ -x "/opt/fingerprint-chromium/chrome" ]; then
-  FINGERPRINT_BIN="/opt/fingerprint-chromium/chrome"
-else
-  NESTED_FINGERPRINT_BIN="$(find /opt/fingerprint-chromium -maxdepth 2 -type f \( -name chrome-wrapper -o -name chrome \) 2>/dev/null | head -n 1)"
-  if [ -n "${NESTED_FINGERPRINT_BIN}" ] && [ -x "${NESTED_FINGERPRINT_BIN}" ]; then
-    FINGERPRINT_BIN="${NESTED_FINGERPRINT_BIN}"
-  fi
-fi
 
 if [ -n "${FINGERPRINT_BIN}" ]; then
   echo "Using fingerprint-chromium binary: ${FINGERPRINT_BIN} (seed=${FINGERPRINT_SEED:-1000})"

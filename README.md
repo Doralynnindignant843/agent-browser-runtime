@@ -36,6 +36,12 @@ docker compose up --build -d
 ./scripts/smoke-test.sh
 ```
 
+To enable a mounted `fingerprint-chromium` binary, set `BRS_FINGERPRINT_CHROMIUM_HOST_PATH` to a host directory containing `chrome-wrapper` or `chrome`, then start with the overlay:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.fingerprint.yml up --build -d
+```
+
 Open noVNC when a login, challenge, or manual inspection is needed:
 
 ```bash
@@ -52,6 +58,7 @@ Quick manual checks:
 Expected outputs: broker status, TLS gateway health, HTML artifact, screenshot artifact, and a real Chrome Tab Group visible in noVNC.
 
 `./cli/brs.js status` also reports `stealth.enabled`, fingerprint header/patch toggles, and whether the startup-level TLS gateway proxy is configured and active.
+The default runtime preset is `linkedin`, which aligns the browser identity around a Chrome 124 macOS profile to match the bundled TLS gateway profile. When the fingerprint overlay is used, `status.browserRuntime.fingerprintChromium.active` reports whether the mounted binary was actually selected.
 It now also reports the loaded runtime fingerprint summary from the extension, including generated UA family, UA-CH header keys, platform, WebGL, and hardware-surface values.
 The `BRS_*` environment prefix is kept as the stable Browser Runtime Service config surface.
 
@@ -98,6 +105,7 @@ Default host CDP port is `19223` to avoid conflicts with other local browser ser
 
 - `docs/SPEC.md` — architecture and API spec
 - `docker-compose.yml` — tls-gateway + broker + chrome-runtime
+- `docker-compose.fingerprint.yml` — optional fingerprint-chromium mount overlay
 - `broker/` — HTTP/WS control plane
 - `extension/` — Chrome companion extension for real Tab Groups + debugger CDP
 - `runtime/chrome/` — Chromium + noVNC container

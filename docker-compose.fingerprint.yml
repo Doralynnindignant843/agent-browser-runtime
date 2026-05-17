@@ -1,0 +1,11 @@
+services:
+  chrome-runtime:
+    environment:
+      FINGERPRINT_PLATFORM: ${FINGERPRINT_PLATFORM:-macos}
+      BRS_FINGERPRINT_PLATFORM: ${BRS_FINGERPRINT_PLATFORM:-macos}
+      BRS_CHROME_MAJOR: ${BRS_CHROME_MAJOR:-124}
+      BRS_STEALTH_PROFILE: ${BRS_STEALTH_PROFILE:-linkedin}
+      BROWSER_TIMEZONE: ${BROWSER_TIMEZONE:-America/Los_Angeles}
+      BRS_STEALTH_TIMEZONE: ${BRS_STEALTH_TIMEZONE:-America/Los_Angeles}
+    volumes:
+      - ${BRS_FINGERPRINT_CHROMIUM_HOST_PATH:?Set BRS_FINGERPRINT_CHROMIUM_HOST_PATH to a host directory containing chrome-wrapper or chrome}:/opt/fingerprint-chromium:ro

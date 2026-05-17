@@ -51,7 +51,7 @@ Endpoints:
 
 ## Browser Consistency
 
-The runtime exposes a default-on anti-bot/risk-control compatibility layer: seed-based fingerprint profile, UA/UA-CH headers, main-world stealth evasions, locale/timezone CDP overrides, startup-level TLS gateway proxy, and humanized pacing through `BRS_*` env vars.
+The runtime exposes a default-on anti-bot/risk-control compatibility layer: seed-based fingerprint profile, optional mounted fingerprint-chromium binary, UA/UA-CH headers, main-world stealth evasions, locale/timezone CDP overrides, startup-level TLS gateway proxy, and humanized pacing through `BRS_*` env vars.
 
 `./cli/brs.js status` should show `extensionConnected: true`, `stealth.tlsGateway.active: true`, and `tlsGateway.health.ok: true`.
 
