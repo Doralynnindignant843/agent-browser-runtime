@@ -69,7 +69,7 @@ Default capabilities:
 - Chromium major/full version is detected from the runtime binary by default. `BRS_CHROME_MAJOR` and `BRS_CHROME_FULL_VERSION` intentionally override the detected version when set.
 - `BRS_FINGERPRINT_HEADERS_ENABLED=1`: apply generated headers plus optional `BRS_EXTRA_HTTP_HEADERS_JSON` through CDP before first navigation.
 - `BRS_FINGERPRINT_PATCHES_ENABLED=1`: inject `stealth-content.js` in the main world at `document_start`; default evasions cover webdriver, languages, platform, vendor, plugins/mimeTypes, Chrome app/runtime stubs, media codecs, WebGL, canvas, and audio.
-- `BRS_STEALTH_EXCLUDED_HOSTS=accounts.google.com`: skip CDP header/UA overrides and content-script patches for high-trust login hosts where a spoofed browser identity is more likely to hurt than help.
+- `BRS_STEALTH_EXCLUDED_HOSTS=accounts.google.com,linkedin.com,www.linkedin.com`: skip CDP header/UA overrides and content-script patches for high-trust login hosts where a spoofed browser identity is more likely to hurt than help.
 - `BRS_CANVAS_NOISE_ENABLED=1` / `BRS_AUDIO_NOISE_ENABLED=1`: patch common canvas/audio fingerprint surfaces.
 - `BRS_LOCALE`, `BRS_STEALTH_TIMEZONE`, `BRS_USER_AGENT`, `BRS_PLATFORM`, `BRS_WEBGL_VENDOR`, and `BRS_WEBGL_RENDERER`: optional explicit profile overrides.
 - `BOT_HUMANIZE_LEVEL` and per-job `--humanize`: task-level pacing, mousemove, scroll, and pauses.
